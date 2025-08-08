@@ -1,0 +1,38 @@
+{
+  "name": "shapefile-to-kml-converter",
+  "version": "1.0.0",
+  "description": "Full-stack application for converting shapefiles to KML format",
+  "main": "index.js",
+  "scripts": {
+    "setup": "node setup.js",
+    "install:backend": "cd backend && npm install",
+    "install:frontend": "cd frontend && npm install",
+    "install:python": "cd backend && pip install -r requirements.txt",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "build:frontend": "cd frontend && npm run build",
+    "start:backend": "cd backend && npm start",
+    "start": "npm run build:frontend && npm run start:backend",
+    "clean": "rm -rf backend/uploads backend/temp backend/output frontend/dist",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "shapefile",
+    "kml",
+    "converter",
+    "gis",
+    "react",
+    "nodejs",
+    "python"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+} 

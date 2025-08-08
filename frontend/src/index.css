@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Watermark styles */
+body::before {
+  content: "JOORA DRONES";
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  font-size: 8rem;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.03);
+  z-index: -1;
+  pointer-events: none;
+  white-space: nowrap;
+  font-family: 'Arial', sans-serif;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive watermark */
+@media (max-width: 768px) {
+  body::before {
+    font-size: 4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  body::before {
+    font-size: 2.5rem;
+  }
+} 

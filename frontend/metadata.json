@@ -1,0 +1,5 @@
+{
+  "name": "Shapefile to KML Converter",
+  "description": "A web application to upload a shapefile (in a .zip archive), which gets converted to a KML file for download or preview. This frontend simulates a backend process.",
+  "requestFramePermissions": []
+}
