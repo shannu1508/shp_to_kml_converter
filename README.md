@@ -7,6 +7,7 @@ A full-stack web application for converting shapefiles to KML format. The applic
 - **Drag & Drop Interface**: Easy file upload with drag and drop support
 - **Real-time Processing**: Live status updates during conversion
 - **KML Preview**: Preview generated KML files before download
+- **Map Preview**: View KML data on interactive maps with multiple free tile providers (OpenStreetMap, CartoDB, ESRI, etc.)
 - **MongoDB Integration**: Persistent storage of conversion history
 - **Python Script Integration**: Leverages geopandas for accurate shapefile processing
 - **Automatic Cleanup**: Temporary files are automatically cleaned up
@@ -108,7 +109,7 @@ npm start
 
 1. **Upload Shapefiles**: Drag and drop a ZIP file containing shapefiles onto the upload area
 2. **Monitor Progress**: Watch the real-time status updates during conversion
-3. **Preview Results**: View the generated KML content before downloading
+3. **Preview Results**: View the generated KML content as text or on interactive maps with multiple free tile providers
 4. **Download KML**: Download the converted KML file for use in Google Earth
 
 ## API Endpoints
@@ -130,6 +131,18 @@ The frontend is configured to proxy API requests to the backend automatically.
 
 - `PORT` (Backend): Server port (default: 3001)
 - `MONGODB_URI` (Backend): MongoDB connection string
+
+### Map Preview Features
+
+The application includes a free map preview functionality with multiple tile providers:
+
+- **OpenStreetMap**: Standard street map view
+- **CartoDB Positron**: Clean, minimal design
+- **CartoDB Dark**: Dark theme for better contrast
+- **ESRI World Imagery**: Satellite imagery
+- **Stamen Terrain**: Terrain-focused view
+
+**No API keys required** - All map providers are completely free to use!
 
 ### Python Script Parameters
 
