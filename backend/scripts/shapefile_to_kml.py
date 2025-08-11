@@ -117,51 +117,141 @@ def read_input_file(file, name_field, description_field, output_path):
             input_file = input_file.to_crs(4326)
 
         # Check input file fields
+        print(f'Available columns in {os.path.basename(file)}: {list(input_file.columns)}')
+        
         field_in_file = name_field in input_file.columns
         if field_in_file is False:
-            raise ValueError(f'"{name_field}" field is not found in {os.path.basename(file)}. Please verify name_field parameter')
+            # Try to find a suitable alternative field
+            if 'id' in input_file.columns:
+                name_field = 'id'
+                print(f'Using "id" field instead of "{name_field}"')
+            elif 'name' in input_file.columns:
+                name_field = 'name'
+                print(f'Using "name" field instead of "{name_field}"')
+            elif 'OBJECTID' in input_file.columns:
+                name_field = 'OBJECTID'
+                print(f'Using "OBJECTID" field instead of "{name_field}"')
+            else:
+                raise ValueError(f'"{name_field}" field is not found in {os.path.basename(file)}. Available fields: {list(input_file.columns)}')
         
         field_in_file = description_field in input_file.columns
         if field_in_file is False:
-            raise ValueError(f'"{description_field}" field is not found in {os.path.basename(file)}. Please verify description_field parameter')
+            # Try to find a suitable alternative field
+            if 'description' in input_file.columns:
+                description_field = 'description'
+                print(f'Using "description" field instead of "{description_field}"')
+            elif 'desc' in input_file.columns:
+                description_field = 'desc'
+                print(f'Using "desc" field instead of "{description_field}"')
+            elif 'comment' in input_file.columns:
+                description_field = 'comment'
+                print(f'Using "comment" field instead of "{description_field}"')
+            else:
+                # Use the first available field as description
+                available_fields = [col for col in input_file.columns if col != name_field]
+                if available_fields:
+                    description_field = available_fields[0]
+                    print(f'Using "{description_field}" field as description')
+                else:
+                    raise ValueError(f'"{description_field}" field is not found in {os.path.basename(file)}. Available fields: {list(input_file.columns)}')
 
         # Check geometries for Polygon or LineString
         geom_type = ''
         for q in input_file.geometry:
-            if q.type == 'Polygon':
-                geom_type = 'Polygon'
-            elif q.type == 'LineString':
-                geom_type = 'LineString'
+            if q is None:
+                continue  # Skip None geometries
+            if hasattr(q, 'type'):
+                if q.type == 'Polygon':
+                    geom_type = 'Polygon'
+                elif q.type == 'LineString':
+                    geom_type = 'LineString'
+                elif q.type == 'Point':
+                    geom_type = 'Point'
+                elif q.type == 'MultiPolygon':
+                    geom_type = 'MultiPolygon'
+                elif q.type == 'MultiLineString':
+                    geom_type = 'MultiLineString'
+                else:
+                    message = f'{os.path.basename(file)} contains unsupported geometry type: {q.type}. Supported types: Polygon, LineString, Point, MultiPolygon, MultiLineString'
+                    raise ValueError(message)
             else:
-                message = f'{os.path.basename(file)} contains objects other than Polygons or LineStrings. Please remove file from input directory or modify file objects. Note that MultiPolygon and MultiLineStrings are not supported.'
+                message = f'{os.path.basename(file)} contains invalid geometry objects'
                 raise ValueError(message)
 
         if geom_type == 'Polygon':
             for index, row in input_file.iterrows():
-                geom = (row.geometry)
-                ext = list(geom.exterior.coords)
-                int_ring = []
-                for interior in geom.interiors:
-                    int_ring.append(list(interior.coords))
-                kml = simplekml.Kml()
-                pg = kml.newpolygon(name=(row[name_field]), description=(row[description_field]))
-                pg.outerboundaryis = ext
-                if int_ring == []:
-                    pass
-                else:
-                    pg.innerboundaryis = int_ring
-                kml.save(os.path.join(output_path, fn + '_' + str(row[name_field]) + '.kml'))
+                try:
+                    geom = (row.geometry)
+                    if geom is None:
+                        print(f'Skipping row {index} - no geometry')
+                        continue
+                    ext = list(geom.exterior.coords)
+                    int_ring = []
+                    for interior in geom.interiors:
+                        int_ring.append(list(interior.coords))
+                    kml = simplekml.Kml()
+                    pg = kml.newpolygon(name=str(row[name_field]), description=str(row[description_field]))
+                    pg.outerboundaryis = ext
+                    if int_ring:
+                        pg.innerboundaryis = int_ring
+                    kml.save(os.path.join(output_path, fn + '_' + str(row[name_field]) + '.kml'))
+                except Exception as e:
+                    print(f'Error processing Polygon row {index}: {str(e)}')
+                    continue
 
         elif geom_type == 'LineString':
             for index, row in input_file.iterrows():
                 geom = (row.geometry)
+                if geom is None:
+                    continue
                 xyz = list(geom.coords)
                 kml = simplekml.Kml()
                 l = kml.newlinestring(name=(row[name_field]), description=(row[description_field]))
                 l.coords = xyz
                 kml.save(os.path.join(output_path, fn + '_' + str(row[name_field]) + '.kml'))
+        
+        elif geom_type == 'Point':
+            for index, row in input_file.iterrows():
+                geom = (row.geometry)
+                if geom is None:
+                    continue
+                xyz = list(geom.coords)
+                kml = simplekml.Kml()
+                p = kml.newpoint(name=(row[name_field]), description=(row[description_field]))
+                p.coords = xyz
+                kml.save(os.path.join(output_path, fn + '_' + str(row[name_field]) + '.kml'))
+        
+        elif geom_type == 'MultiPolygon':
+            for index, row in input_file.iterrows():
+                geom = (row.geometry)
+                if geom is None:
+                    continue
+                kml = simplekml.Kml()
+                for i, poly in enumerate(geom.geoms):
+                    ext = list(poly.exterior.coords)
+                    int_ring = []
+                    for interior in poly.interiors:
+                        int_ring.append(list(interior.coords))
+                    pg = kml.newpolygon(name=f"{row[name_field]}_{i+1}", description=(row[description_field]))
+                    pg.outerboundaryis = ext
+                    if int_ring:
+                        pg.innerboundaryis = int_ring
+                kml.save(os.path.join(output_path, fn + '_' + str(row[name_field]) + '.kml'))
+        
+        elif geom_type == 'MultiLineString':
+            for index, row in input_file.iterrows():
+                geom = (row.geometry)
+                if geom is None:
+                    continue
+                kml = simplekml.Kml()
+                for i, line in enumerate(geom.geoms):
+                    xyz = list(line.coords)
+                    l = kml.newlinestring(name=f"{row[name_field]}_{i+1}", description=(row[description_field]))
+                    l.coords = xyz
+                kml.save(os.path.join(output_path, fn + '_' + str(row[name_field]) + '.kml'))
+        
         else:
-            print('Only polygons and linestring files are supported for now!')
+            print(f'Unsupported geometry type: {geom_type}')
 
         return os.path.basename(file), '--> .kml'
         
@@ -183,6 +273,14 @@ def main():
     OUTPUT_PATH = args.output_path
     NAME = args.name_field
     DESCRIPTION = args.description_field
+    
+    # Debug output
+    print(f'Input path: {INPUT_PATH}')
+    print(f'Output path: {OUTPUT_PATH}')
+    print(f'Name field: {NAME}')
+    print(f'Description field: {DESCRIPTION}')
+    print(f'Input path exists: {os.path.exists(INPUT_PATH)}')
+    print(f'Input path is directory: {os.path.isdir(INPUT_PATH)}')
     
     # Create output directory
     create_directory(OUTPUT_PATH)

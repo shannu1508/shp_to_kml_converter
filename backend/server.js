@@ -180,6 +180,51 @@ app.get('/api/download/:id/:filename', async (req, res) => {
   }
 });
 
+// New endpoint to download all files as a ZIP
+app.get('/api/download-all/:id', async (req, res) => {
+  try {
+    const conversion = await Conversion.findOne({ id: req.params.id });
+    if (!conversion) {
+      return res.status(404).json({ error: 'Conversion not found' });
+    }
+
+    if (conversion.status !== 'completed') {
+      return res.status(400).json({ error: 'Conversion not completed' });
+    }
+
+    // Create a new ZIP file
+    const zip = new AdmZip();
+    
+    // Add the combined KML file if it exists
+    if (conversion.kmlContent) {
+      zip.addFile(conversion.kmlFileName, Buffer.from(conversion.kmlContent, 'utf8'));
+    }
+    
+    // Add individual KML files if they exist
+    if (conversion.individualFiles && conversion.individualFiles.length > 0) {
+      conversion.individualFiles.forEach(file => {
+        zip.addFile(file.fileName, Buffer.from(file.content, 'utf8'));
+      });
+    }
+
+    // Generate ZIP buffer
+    const zipBuffer = zip.toBuffer();
+    
+    // Set response headers
+    const zipFileName = `${conversion.originalFileName.replace('.zip', '')}_all_files.zip`;
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', `attachment; filename="${zipFileName}"`);
+    res.setHeader('Content-Length', zipBuffer.length);
+    
+    // Send the ZIP file
+    res.send(zipBuffer);
+
+  } catch (error) {
+    console.error('Download all files error:', error);
+    res.status(500).json({ error: 'Download failed' });
+  }
+});
+
 // Function to combine multiple KML files into one
 async function combineKmlFiles(outputDir, kmlFiles) {
   let combinedKml = `<?xml version="1.0" encoding="UTF-8"?>
