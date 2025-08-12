@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { UploadIcon, FileZipIcon, SpinnerIcon, CheckCircleIcon, XCircleIcon, DownloadIcon, EyeIcon, MapIcon } from './components/Icons';
+import { UploadIcon, FileZipIcon, SpinnerIcon, CheckCircleIcon, XCircleIcon, DownloadIcon } from './components/Icons';
 
 // --- ZIP Validation Function ---
 const validateZipContents = async (file) => {
@@ -118,8 +118,8 @@ const FileDropzone = ({ onFileSelect, status }) => {
         onClick={onButtonClick}
         className={`w-full max-w-3xl p-6 md:p-8 border-2 border-dashed rounded-2xl text-center transition-all duration-300 cursor-pointer backdrop-blur-sm ${
         dragActive 
-          ? 'border-blue-400 bg-blue-500/10 shadow-xl shadow-blue-500/25 scale-105' 
-          : 'border-gray-400 hover:border-blue-500 hover:bg-gray-100/30 hover:shadow-lg hover:shadow-blue-500/10'
+          ? 'border-gray-400 bg-gray-500/10 shadow-xl shadow-gray-500/25 scale-105' 
+          : 'border-gray-400 hover:border-gray-500 hover:bg-gray-100/30 hover:shadow-lg hover:shadow-gray-500/10'
         }`}
     >
       <input 
@@ -132,23 +132,23 @@ const FileDropzone = ({ onFileSelect, status }) => {
       />
       <div className="flex flex-col items-center justify-center space-y-4 text-gray-700">
         <div className={`transition-all duration-300 ${dragActive ? 'scale-110' : ''}`}>
-          <UploadIcon className="w-12 h-12 md:w-16 md:h-16 text-blue-500" />
+          <UploadIcon className="w-12 h-12 md:w-16 md:h-16 text-gray-600" />
         </div>
         <div className="space-y-2">
-          <p className="text-lg md:text-xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <p className="text-lg md:text-xl font-semibold text-gray-700">
             Drag & Drop your .zip file here
           </p>
           <p className="text-sm text-gray-500">or</p>
           <button 
             type="button" 
-            className="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
+            className="px-6 py-3 text-sm font-medium text-white bg-gray-700 rounded-xl hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500/50 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
           >
             Browse Files
           </button>
         </div>
         <div className="mt-4 p-3 bg-gray-100/50 rounded-xl max-w-sm">
           <p className="text-xs text-gray-600">
-            <span className="font-medium text-blue-600">Supported:</span> ZIP files containing ESRI Shapefiles (.shp, .shx, .dbf)
+            <span className="font-medium text-gray-700">Supported:</span> ZIP files should contain ESRI Shapefiles (.shp, .shx, .dbf)
           </p>
         </div>
       </div>
@@ -166,10 +166,10 @@ const StatusDisplay = ({ status, fileName, error }) => {
 
     switch (status) {
         case 'PROCESSING':
-            icon = <SpinnerIcon className="w-12 h-12 md:w-16 md:h-16 text-blue-500 animate-spin" />;
+            icon = <SpinnerIcon className="w-12 h-12 md:w-16 md:h-16 text-gray-600 animate-spin" />;
             message = `Processing ${fileName}...`;
-            colorClass = 'text-blue-700';
-            bgClass = 'bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-500/20';
+            colorClass = 'text-gray-700';
+            bgClass = 'bg-gradient-to-r from-gray-500/10 to-gray-600/10 border-gray-500/20';
             break;
         case 'SUCCESS':
             icon = <CheckCircleIcon className="w-12 h-12 md:w-16 md:h-16 text-green-500" />;
@@ -195,7 +195,7 @@ const StatusDisplay = ({ status, fileName, error }) => {
             <p className="text-lg md:text-xl font-medium text-center">{message}</p>
             {status === 'PROCESSING' && (
                 <div className="w-48 bg-gray-300 rounded-full h-1.5 overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse"></div>
+                    <div className="h-full bg-gradient-to-r from-gray-500 to-gray-600 rounded-full animate-pulse"></div>
                 </div>
             )}
         </div>
@@ -228,7 +228,7 @@ const ValidationModal = ({ isOpen, message, onClose }) => {
                 <div className="flex justify-end">
                     <button 
                         onClick={onClose}
-                        className="px-6 py-2 font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-300 transform hover:scale-105"
+                        className="px-6 py-2 font-medium text-white bg-gray-700 rounded-xl hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500/50 transition-all duration-300 transform hover:scale-105"
                     >
                         OK
                     </button>
@@ -239,8 +239,6 @@ const ValidationModal = ({ isOpen, message, onClose }) => {
 };
 
 const ResultPanel = ({ result, onReset }) => {
-    const [mapPreview, setMapPreview] = useState({ isOpen: false, content: null, fileName: null });
-
     const handleCombinedDownload = () => {
         // Download all files as a ZIP
         fetch(`/api/download-all/${result.conversionId}`)
@@ -261,45 +259,6 @@ const ResultPanel = ({ result, onReset }) => {
             });
     };
 
-    const handleMapPreview = async (fileName) => {
-        try {
-            const response = await fetch(`/api/download/${result.conversionId}/${fileName}`);
-            if (!response.ok) {
-                throw new Error('Map preview failed');
-            }
-            const content = await response.text();
-            setMapPreview({
-                isOpen: true,
-                content: content,
-                fileName: fileName
-            });
-        } catch (error) {
-            console.error('Map preview failed:', error);
-            alert('Map preview failed');
-        }
-    };
-
-    const handleIndividualDownload = async (fileName) => {
-        try {
-            const response = await fetch(`/api/download/${result.conversionId}/${fileName}`);
-            if (!response.ok) {
-                throw new Error('Download failed');
-            }
-            const blob = await response.blob();
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error('Download failed:', error);
-            alert('Download failed');
-        }
-    };
-
     return (
         <div className="w-full max-w-3xl p-6 bg-gradient-to-br from-white/80 to-gray-100/80 rounded-2xl border border-gray-300 backdrop-blur-sm shadow-xl">
             <div className="flex justify-between items-center mb-6">
@@ -309,17 +268,19 @@ const ResultPanel = ({ result, onReset }) => {
                     </div>
                     <h3 className="text-lg font-bold text-gray-800">Conversion Complete</h3>
                 </div>
-                <button 
-                    onClick={onReset} 
-                    className="text-xs text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition-all duration-300"
+                <button
+                    onClick={onReset}
+                    title="Reset and start a new conversion"
+                    className="group inline-flex items-center gap-2 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 px-3 py-1.5 rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
                 >
-                    Start Over
+                    
+                    <span>Start Over</span>
                 </button>
             </div>
             
-            <div className="flex items-center space-x-4 p-4 bg-gradient-to-r from-gray-100/50 to-white/50 rounded-xl border border-gray-300 mb-6">
-                <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <FileZipIcon className="w-6 h-6 text-blue-600" />
+            <div className="flex items-center space-x-4 p-4 bg-gradient-to-r from-gray-100/50 to-white/50 rounded-xl border border-gray-300">
+                <div className="w-12 h-12 bg-gray-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <FileZipIcon className="w-6 h-6 text-gray-600" />
                 </div>
                 <div className="flex-grow min-w-0">
                     <p className="font-mono text-sm text-green-600 font-medium truncate">{result.fileName}</p>
@@ -329,447 +290,27 @@ const ResultPanel = ({ result, onReset }) => {
                             : 'KML file ready for download'}
                     </p>
                     {result.processedFiles && result.processedFiles.length > 1 && (
-                        <p className="text-xs text-blue-600 mt-1 font-medium">
+                        <p className="text-xs text-gray-600 mt-1 font-medium">
                             Processed: {result.processedFiles.join(', ')}
                         </p>
                     )}
                 </div>
-                
-                {/* Combined Download Button */}
-                <button
-                    onClick={handleCombinedDownload}
-                    className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-300 transform hover:scale-105 shadow-md"
-                >
-                    <DownloadIcon className="w-4 h-4" />
-                    <span>Download All</span>
-                </button>
             </div>
 
-            {/* Individual file downloads and map preview */}
-            {result.processedFiles && result.processedFiles.length > 1 && (
-                <div className="p-4 bg-gray-100/30 rounded-xl border border-gray-300 mb-4">
-                    <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center space-x-2">
-                        <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
-                        Individual Files
-                    </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {result.processedFiles.map((fileName, index) => (
-                            <div key={index} className="flex flex-col space-y-2 p-3 bg-white/50 rounded-lg border border-gray-300">
-                                <p className="text-xs font-mono text-gray-700 truncate">{fileName}</p>
-                                <div className="flex space-x-1">
-                                    <button
-                                        onClick={() => handleIndividualDownload(fileName)}
-                                        className="flex-1 flex items-center justify-center space-x-1 px-2 py-1.5 text-xs font-medium bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors"
-                                    >
-                                        <DownloadIcon className="w-3 h-3" />
-                                        <span>Download</span>
-                                    </button>
-                                    <button
-                                        onClick={() => handleMapPreview(fileName)}
-                                        className="flex-1 flex items-center justify-center space-x-1 px-2 py-1.5 text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
-                                    >
-                                        <MapIcon className="w-3 h-3" />
-                                        <span>View Map</span>
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* Map Preview Modal */}
-            <MapPreviewModal 
-                isOpen={mapPreview.isOpen}
-                kmlContent={mapPreview.content}
-                fileName={mapPreview.fileName}
-                onClose={() => setMapPreview({ isOpen: false, content: null, fileName: null })}
-            />
+            {/* Primary CTA placed at the bottom */}
+            <div className="mt-6">
+                <button
+                    onClick={handleCombinedDownload}
+                    className="w-full flex items-center justify-center gap-3 px-6 py-4 text-base font-semibold text-white rounded-xl bg-gradient-to-r from-gray-700 via-gray-800 to-black hover:from-gray-800 hover:via-gray-900 hover:to-black shadow-lg shadow-gray-600/30 hover:shadow-gray-700/50 ring-1 ring-gray-500/30 hover:ring-gray-400/50 transition-all duration-300"
+                >
+                    <DownloadIcon className="w-5 h-5" />
+                    <span>Download</span>
+                </button>
+                <p className="text-xs text-gray-600 mt-2 text-center">Get a single ZIP containing all kml files.</p>
+            </div>
         </div>
     );
 }
-
-const MapPreviewModal = ({ isOpen, kmlContent, fileName, onClose }) => {
-    const mapRef = useRef(null);
-    const [mapLoaded, setMapLoaded] = useState(false);
-    const [mapInstance, setMapInstance] = useState(null);
-    const [selectedProvider, setSelectedProvider] = useState('cartodb');
-    const [tileLayer, setTileLayer] = useState(null);
-
-    // Available free tile providers - using light themes
-    const tileProviders = {
-        cartodb: {
-            name: 'CartoDB Positron',
-            url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
-            maxZoom: 20
-        },
-        osm: {
-            name: 'OpenStreetMap',
-            url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            maxZoom: 19
-        },
-        stamen: {
-            name: 'Stamen Terrain',
-            url: 'https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.png',
-            attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> — Map data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            maxZoom: 18
-        },
-        esri: {
-            name: 'ESRI World Street Map',
-            url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
-            attribution: 'Tiles © <a href="https://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer">Esri</a>',
-            maxZoom: 19
-        }
-    };
-
-    React.useEffect(() => {
-        if (!isOpen || !kmlContent) return;
-
-        // Load Leaflet CSS and JS if not already loaded
-        if (!window.L) {
-            // Load Leaflet CSS
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-            link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
-            link.crossOrigin = '';
-            document.head.appendChild(link);
-
-            // Load Leaflet JS
-            const script = document.createElement('script');
-            script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-            script.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
-            script.crossOrigin = '';
-            script.onload = () => initializeMap();
-            script.onerror = () => {
-                console.error('Failed to load Leaflet');
-                setMapLoaded(true);
-            };
-            document.head.appendChild(script);
-        } else {
-            initializeMap();
-        }
-
-        return () => {
-            // Cleanup
-            if (mapInstance) {
-                mapInstance.remove();
-                setMapInstance(null);
-            }
-            if (mapRef.current) {
-                mapRef.current.innerHTML = '';
-            }
-        };
-    }, [isOpen, kmlContent]);
-
-    const changeTileProvider = (providerKey) => {
-        if (!mapInstance || !tileLayer) return;
-        
-        const provider = tileProviders[providerKey];
-        tileLayer.remove();
-        
-        const newTileLayer = window.L.tileLayer(provider.url, {
-            attribution: provider.attribution,
-            maxZoom: provider.maxZoom
-        }).addTo(mapInstance);
-        
-        setTileLayer(newTileLayer);
-        setSelectedProvider(providerKey);
-    };
-
-    const initializeMap = () => {
-        if (!mapRef.current || !kmlContent || !window.L) return;
-
-        try {
-            // Parse KML content first to determine the best initial view
-            const parser = new DOMParser();
-            const kmlDoc = parser.parseFromString(kmlContent, 'text/xml');
-            
-            const bounds = window.L.latLngBounds();
-            let hasFeatures = false;
-            let polygonBounds = null;
-
-            // First pass: find polygon bounds for initial positioning
-            const placemarks = kmlDoc.querySelectorAll('Placemark');
-            placemarks.forEach(placemark => {
-                // Parse Polygon features first (these are usually the main boundaries)
-                const polygon = placemark.querySelector('Polygon outerBoundaryIs LinearRing coordinates');
-                if (polygon) {
-                    const coordPairs = polygon.textContent.trim().split(/\s+/);
-                    const latlngs = coordPairs.map(pair => {
-                        const [lng, lat] = pair.split(',').map(Number);
-                        return [lat, lng];
-                    }).filter(coord => !isNaN(coord[0]) && !isNaN(coord[1]));
-
-                    if (latlngs.length > 0) {
-                        const tempBounds = window.L.latLngBounds(latlngs);
-                        if (!polygonBounds) {
-                            polygonBounds = tempBounds;
-                        } else {
-                            polygonBounds.extend(tempBounds);
-                        }
-                        hasFeatures = true;
-                    }
-                }
-
-                // Parse MultiGeometry polygons
-                const multiGeometry = placemark.querySelector('MultiGeometry');
-                if (multiGeometry) {
-                    const geometries = multiGeometry.children;
-                    for (let geom of geometries) {
-                        if (geom.tagName === 'Polygon') {
-                            const coordPairs = geom.querySelector('outerBoundaryIs LinearRing coordinates')?.textContent.trim().split(/\s+/);
-                            if (coordPairs) {
-                                const latlngs = coordPairs.map(pair => {
-                                    const [lng, lat] = pair.split(',').map(Number);
-                                    return [lat, lng];
-                                }).filter(coord => !isNaN(coord[0]) && !isNaN(coord[1]));
-
-                                if (latlngs.length > 0) {
-                                    const tempBounds = window.L.latLngBounds(latlngs);
-                                    if (!polygonBounds) {
-                                        polygonBounds = tempBounds;
-                                    } else {
-                                        polygonBounds.extend(tempBounds);
-                                    }
-                                    hasFeatures = true;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Determine initial map center and zoom based on polygon bounds
-            let initialCenter = [0, 0];
-            let initialZoom = 2;
-            
-            if (polygonBounds && polygonBounds.isValid()) {
-                initialCenter = polygonBounds.getCenter();
-                // Calculate appropriate zoom level based on bounds size
-                const latDiff = polygonBounds.getNorthEast().lat - polygonBounds.getSouthWest().lat;
-                const lngDiff = polygonBounds.getNorthEast().lng - polygonBounds.getSouthWest().lng;
-                const maxDiff = Math.max(latDiff, lngDiff);
-                
-                if (maxDiff > 10) initialZoom = 6;
-                else if (maxDiff > 5) initialZoom = 8;
-                else if (maxDiff > 2) initialZoom = 10;
-                else if (maxDiff > 1) initialZoom = 12;
-                else if (maxDiff > 0.5) initialZoom = 14;
-                else if (maxDiff > 0.1) initialZoom = 16;
-                else initialZoom = 18;
-            }
-
-            // Create a new map using Leaflet with calculated center and zoom
-            const map = window.L.map(mapRef.current, {
-                center: initialCenter,
-                zoom: initialZoom,
-                zoomControl: true,
-                attributionControl: true
-            });
-
-            // Add initial tile layer (CartoDB Positron - light theme)
-            const initialProvider = tileProviders[selectedProvider];
-            const initialTileLayer = window.L.tileLayer(initialProvider.url, {
-                attribution: initialProvider.attribution,
-                maxZoom: initialProvider.maxZoom
-            }).addTo(map);
-
-            setTileLayer(initialTileLayer);
-
-            // Second pass: create all features and add to map
-            placemarks.forEach(placemark => {
-                const name = placemark.querySelector('name')?.textContent || 'Unnamed Feature';
-                const description = placemark.querySelector('description')?.textContent || '';
-                
-                // Parse Point features
-                const point = placemark.querySelector('Point coordinates');
-                if (point) {
-                    const coords = point.textContent.trim().split(',').map(Number);
-                    if (coords.length >= 2) {
-                        const marker = window.L.marker([coords[1], coords[0]]).addTo(map);
-                        marker.bindPopup(`<b>${name}</b><br>${description}`);
-                        bounds.extend([coords[1], coords[0]]);
-                        hasFeatures = true;
-                    }
-                }
-
-                // Parse LineString features
-                const lineString = placemark.querySelector('LineString coordinates');
-                if (lineString) {
-                    const coordPairs = lineString.textContent.trim().split(/\s+/);
-                    const latlngs = coordPairs.map(pair => {
-                        const [lng, lat] = pair.split(',').map(Number);
-                        return [lat, lng];
-                    }).filter(coord => !isNaN(coord[0]) && !isNaN(coord[1]));
-
-                    if (latlngs.length > 0) {
-                        const polyline = window.L.polyline(latlngs, { color: 'red', weight: 3 }).addTo(map);
-                        polyline.bindPopup(`<b>${name}</b><br>${description}`);
-                        bounds.extend(latlngs);
-                        hasFeatures = true;
-                    }
-                }
-
-                // Parse Polygon features
-                const polygon = placemark.querySelector('Polygon outerBoundaryIs LinearRing coordinates');
-                if (polygon) {
-                    const coordPairs = polygon.textContent.trim().split(/\s+/);
-                    const latlngs = coordPairs.map(pair => {
-                        const [lng, lat] = pair.split(',').map(Number);
-                        return [lat, lng];
-                    }).filter(coord => !isNaN(coord[0]) && !isNaN(coord[1]));
-
-                    if (latlngs.length > 0) {
-                        const polygonLayer = window.L.polygon(latlngs, { 
-                            color: 'blue', 
-                            fillColor: '#3388ff', 
-                            fillOpacity: 0.3,
-                            weight: 2 
-                        }).addTo(map);
-                        polygonLayer.bindPopup(`<b>${name}</b><br>${description}`);
-                        bounds.extend(latlngs);
-                        hasFeatures = true;
-                    }
-                }
-
-                // Parse MultiGeometry
-                const multiGeometry = placemark.querySelector('MultiGeometry');
-                if (multiGeometry) {
-                    const geometries = multiGeometry.children;
-                    for (let geom of geometries) {
-                        if (geom.tagName === 'Point') {
-                            const coords = geom.querySelector('coordinates')?.textContent.trim().split(',').map(Number);
-                            if (coords && coords.length >= 2) {
-                                const marker = window.L.marker([coords[1], coords[0]]).addTo(map);
-                                marker.bindPopup(`<b>${name}</b><br>${description}`);
-                                bounds.extend([coords[1], coords[0]]);
-                                hasFeatures = true;
-                            }
-                        } else if (geom.tagName === 'LineString') {
-                            const coordPairs = geom.querySelector('coordinates')?.textContent.trim().split(/\s+/);
-                            if (coordPairs) {
-                                const latlngs = coordPairs.map(pair => {
-                                    const [lng, lat] = pair.split(',').map(Number);
-                                    return [lat, lng];
-                                }).filter(coord => !isNaN(coord[0]) && !isNaN(coord[1]));
-
-                                if (latlngs.length > 0) {
-                                    const polyline = window.L.polyline(latlngs, { color: 'red', weight: 3 }).addTo(map);
-                                    polyline.bindPopup(`<b>${name}</b><br>${description}`);
-                                    bounds.extend(latlngs);
-                                    hasFeatures = true;
-                                }
-                            }
-                        } else if (geom.tagName === 'Polygon') {
-                            const coordPairs = geom.querySelector('outerBoundaryIs LinearRing coordinates')?.textContent.trim().split(/\s+/);
-                            if (coordPairs) {
-                                const latlngs = coordPairs.map(pair => {
-                                    const [lng, lat] = pair.split(',').map(Number);
-                                    return [lat, lng];
-                                }).filter(coord => !isNaN(coord[0]) && !isNaN(coord[1]));
-
-                                if (latlngs.length > 0) {
-                                    const polygonLayer = window.L.polygon(latlngs, { 
-                                        color: 'blue', 
-                                        fillColor: '#3388ff', 
-                                        fillOpacity: 0.3,
-                                        weight: 2 
-                                    }).addTo(map);
-                                    polygonLayer.bindPopup(`<b>${name}</b><br>${description}`);
-                                    bounds.extend(latlngs);
-                                    hasFeatures = true;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Fit map to polygon bounds if available, otherwise use all features bounds
-            if (polygonBounds && polygonBounds.isValid()) {
-                // Small delay to ensure map is fully rendered before fitting bounds
-                setTimeout(() => {
-                    map.fitBounds(polygonBounds, { padding: [20, 20] });
-                }, 100);
-            } else if (hasFeatures && bounds.isValid()) {
-                setTimeout(() => {
-                    map.fitBounds(bounds, { padding: [20, 20] });
-                }, 100);
-            }
-
-            setMapInstance(map);
-            setMapLoaded(true);
-
-        } catch (error) {
-            console.error('Error initializing map:', error);
-            setMapLoaded(true);
-        }
-    };
-
-    if (!isOpen) return null;
-
-    return (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white/95 rounded-2xl w-full max-w-6xl h-[85vh] flex flex-col border border-gray-300 shadow-xl">
-                <div className="flex items-center justify-between p-4 border-b border-gray-300">
-                    <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
-                            <MapIcon className="w-6 h-6 text-green-600" />
-                        </div>
-                        <div>
-                            <h3 className="text-lg font-bold text-gray-800">Map Preview: {fileName}</h3>
-                            <p className="text-xs text-gray-600">Interactive KML visualization</p>
-                        </div>
-                        <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full font-medium">Light Theme</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                        <button 
-                            onClick={onClose}
-                            className="text-gray-500 hover:text-gray-700 text-2xl font-bold p-1 hover:bg-gray-200 rounded-lg transition-colors"
-                        >
-                            ×
-                        </button>
-                    </div>
-                </div>
-                
-                <div className="flex-1 p-4">
-                    <div 
-                        ref={mapRef} 
-                        className="w-full h-full rounded-xl overflow-hidden bg-gray-100 border border-gray-300"
-                        style={{ minHeight: '400px' }}
-                    >
-                        {!mapLoaded && (
-                            <div className="flex items-center justify-center h-full">
-                                <div className="text-center">
-                                    <SpinnerIcon className="w-10 h-10 text-blue-500 mx-auto mb-3 animate-spin" />
-                                    <p className="text-gray-600 text-sm">Loading interactive map...</p>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-                
-                <div className="p-4 border-t border-gray-300">
-                    <div className="flex justify-between items-center">
-                        <div className="text-xs text-gray-600">
-                            <p className="font-medium">Viewing KML data on <span className="text-blue-600">{tileProviders[selectedProvider].name}</span>. You can zoom, pan, and explore the geographic features.</p>
-                            <p className="text-xs text-gray-500 mt-1">Powered by Leaflet - Completely free! No API keys required.</p>
-                        </div>
-                        <button 
-                            onClick={onClose}
-                            className="px-4 py-2 font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-300 transform hover:scale-105"
-                        >
-                            Close
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
 
 // --- Main App Component ---
 
@@ -909,10 +450,10 @@ function App() {
                             e.target.nextSibling.style.display = 'block';
                         }}
                     />
-                    <span className="text-blue-600 font-bold text-lg sm:text-xl hidden">J</span>
+                    <span className="text-gray-700 font-bold text-lg sm:text-xl hidden">J</span>
                 </div>
                 <div className="hidden sm:block">
-                    <span className="text-gray-800 font-bold text-sm sm:text-base block">Joora Drones</span>
+                    <span className="text-gray-800 font-bold text-xl sm:text-lg block"><b>Joora Drones</b></span>
                 </div>
             </a>
         </div>
@@ -920,10 +461,11 @@ function App() {
         <div className="w-full max-w-3xl mx-auto flex flex-col items-center space-y-6 relative z-10">
             <div className="text-center space-y-3 animate-fade-in-up">
                 <div className="space-y-2">
-                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 leading-tight">
-                        Shapefile to KML by Joora Drones
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight">
+                        <span className="text-gray-800">shp to kml file converter for DJI Drones </span>
+            
                     </h1>
-                    <div className="w-16 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full"></div>
+                    <div className="w-16 h-0.5 bg-orange-400 mx-auto rounded-full"></div>
                 </div>
                 
             </div>
@@ -944,7 +486,7 @@ function App() {
                 <div className="flex flex-col items-center space-y-4">
                     <button 
                         onClick={handleReset} 
-                        className="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                        className="px-6 py-3 text-sm font-medium text-white bg-gray-700 rounded-xl hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500/50 transition-all duration-300 transform hover:scale-105 shadow-lg"
                     >
                         Try Again
                     </button>

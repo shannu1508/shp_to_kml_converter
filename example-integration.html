@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shapefile to KML Converter - Integration Example</title>
+    
+    <!-- Include the standalone CSS file -->
+    <link rel="stylesheet" href="shapetokml.css">
+    
+    <style>
+        /* Your existing website styles */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        
+        .header {
+            background: #333;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .content {
+            padding: 2rem;
+        }
+        
+        .footer {
+            background: #f5f5f5;
+            padding: 1rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Your existing website header -->
+    <div class="header">
+        <h1>Your Website</h1>
+        <p>Welcome to our services</p>
+    </div>
+    
+    <!-- Your existing website content -->
+    <div class="content">
+        <h2>Our Services</h2>
+        <p>We offer various tools and services to help you with your projects.</p>
+        
+        <!-- Shapefile to KML Converter Integration -->
+        <div id="shape-to-kml-converter"></div>
+        
+        <!-- More of your website content -->
+        <h2>Other Services</h2>
+        <p>We also provide other amazing services...</p>
+    </div>
+    
+    <!-- Your existing website footer -->
+    <div class="footer">
+        <p>&copy; 2025 Your Company. All rights reserved.</p>
+    </div>
+    
+    <!-- Include the standalone JavaScript file -->
+    <script src="shapetokml.js"></script>
+    
+    <script>
+        // Initialize the converter with your custom options
+        document.addEventListener('DOMContentLoaded', function() {
+            // Method 1: Manual initialization with custom options
+            const converter = initShapeToKmlConverter('shape-to-kml-converter', {
+                apiEndpoint: '/api', // Your API endpoint
+                companyName: 'Your Company Name',
+                companyLogo: 'https://your-website.com/logo.png', // Optional: your logo URL
+                companyUrl: 'https://your-website.com', // Optional: your website URL
+                // You can customize the title text
+                title: 'Convert Shapefiles to KML for DJI Drones'
+            });
+            
+            // Method 2: Auto-initialization using data attributes
+            // Just add this to your HTML:
+            // <div id="shape-to-kml-converter" 
+            //      data-shape-to-kml 
+            //      data-company-name="Your Company"
+            //      data-company-logo="https://your-website.com/logo.png"
+            //      data-company-url="https://your-website.com"
+            //      data-api-endpoint="/api">
+            // </div>
+        });
+    </script>
+</body>
+</html>
